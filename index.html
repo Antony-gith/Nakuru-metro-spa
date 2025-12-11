@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>METRO SPA - The Beauty Palace</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto&display=swap" rel="stylesheet">
+  <style>
+    /* ---------- Base ---------- */
+    *{box-sizing:border-box;margin:0;padding:0;font-family:Roboto,system-ui,-apple-system,"Segoe UI",sans-serif}
+    html,body{height:100%}
+    body{background:#f2f2f2;color:#111;overflow-y:auto}
+    a{color:inherit;text-decoration:none}
+
+    /* ---------- Smart shrink wrapper ----------
+       The page layout is designed at 1200px width.
+       On smaller screens we scale this whole wrapper down so the layout
+       stays identical but shrinks to fit (no reflow).
+    */
+    :root{--desktop-width:1200}
+    .page-wrap {
+      width:1200px;
+      margin:0 auto;
+      transform-origin: top center;
+      transition: transform 200ms linear;
+    }
+
+    /* ---------- Header ---------- */
+    header{
+      text-align:center;
+      padding:36px 20px;
+      background:linear-gradient(135deg,#00ff7f,#32cd32);
+      color:black;
+    }
+    header h1{
+      font-family:'Playfair Display',serif;
+      font-size:42px;
+      margin-bottom:8px;
+      text-decoration:underline;
+    }
+    header p.lead{
+      font-size:16px;
+      margin-bottom:12px;
+      text-decoration:underline;
+      max-width:1000px;
+      margin-left:auto;margin-right:auto;
+    }
+    header p.small{
+      max-width:980px;
+      margin:0 auto;
+      font-size:14px;
+      opacity:.95;
+      margin-top:8px;
+    }
+
+    /* ---------- Map section ---------- */
+    #map-section{padding:22px 0;text-align:center}
+    iframe#map{
+      width:100%;
+      height:360px;
+      border-radius:12px;
+      border:1px solid #ddd;
+      display:block;
+    }
+    .map-controls {
+      display:inline-flex;
+      gap:12px;
+      margin-top:14px;
+      padding:10px;
+      border:1px solid #ccc;        /* grey outline as requested */
+      border-radius:10px;
+      background:#fff;
+    }
+    .map-controls button{
+      background:none;
+      border:1px solid transparent;
+      padding:10px 20px;
+      border-radius:50px;
+      cursor:pointer;
+      font-weight:700;
+      font-size:14px;
+      outline:none;
+    }
+    .map-controls .contact-btn{
+      color:#000;
+      background:transparent;
+      border:none;
+    }
+    .map-controls .get-directions-btn{
+      color:#00ff7f; /* luminous green text */
+      background:transparent;
+      border:none;
+    }
+
+    /* ---------- Sections layout ---------- */
+    section{padding:28px 20px}
+    section h2{
+      font-family:'Playfair Display',serif;
+      font-size:22px;
+      color:#00b33c;
+      margin-bottom:18px;
+      text-align:center;
+      text-decoration:underline;
+    }
+
+    .two-columns{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
+    }
+
+    /* cards - outlined grey, no shadows */
+    .card{
+      background:#fff;
+      padding:14px;
+      border-radius:12px;
+      border:1px solid #ccc; /* grey outline */
+      text-align:center;
+    }
+    .card h3{color:#00b33c;margin-bottom:8px;font-size:16px}
+    .card p{margin-bottom:12px;font-weight:700}
+    .card .btn{
+      display:inline-block;
+      padding:10px 20px;
+      border-radius:50px;
+      background:linear-gradient(135deg,#00ff7f,#32cd32);
+      color:#fff;
+      font-weight:700;
+      border:none;
+      cursor:pointer;
+    }
+
+    /* men hairstyles in 4 columns */
+    .four-columns{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:18px;
+    }
+
+    /* Offers / Discounts */
+    .offers-list{display:flex;flex-direction:column;gap:10px}
+    .offer{background:#fff;padding:10px;border-radius:8px;border:1px solid #ccc}
+
+    /* About / Contact / WhatsApp */
+    #about-us{background:#e9fff0;padding:24px;border-top:3px solid #00ff7f;border-radius:8px}
+    #about-us p{margin-bottom:10px}
+    #whatsapp-btn{
+      display:inline-block;
+      margin-top:12px;
+      padding:10px 18px;
+      border-radius:50px;
+      background:linear-gradient(135deg,#00ff7f,#32cd32);
+      color:#fff;
+      font-weight:700;
+      text-decoration:none;
+    }
+
+    /* Admin UI */
+    #admin-area{display:none;padding:20px;background:#fff;border:1px solid #ccc;border-radius:10px;margin-top:18px}
+    #admin-area h3{margin-bottom:10px}
+    .admin-list{max-height:320px;overflow:auto;display:flex;flex-direction:column;gap:8px}
+    .admin-item{padding:10px;border:1px solid #ddd;border-radius:8px;background:#fafafa;font-size:13px}
+
+    /* Modal (booking form) */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:9999}
+    .modal{width:480px;max-width:95%;background:#fff;padding:18px;border-radius:12px;border:1px solid #ccc}
+    .modal h4{margin-bottom:10px}
+    .modal label{display:block;font-size:13px;margin-top:8px}
+    .modal input,.modal select,.modal textarea{width:100%;padding:8px;margin-top:6px;border-radius:8px;border:1px solid #ccc}
+    .modal .row{display:flex;gap:8px}
+    .modal .row .col{flex:1}
+    .modal .actions{margin-top:12px;text-align:right}
+    .modal .actions button{margin-left:8px}
+
+    /* small tweaks */
+    footer{padding:20px;text-align:center;background:#222;color:#fff;margin-top:20px;border-radius:8px}
+    .muted{color:#666;font-size:13px}
+
+    /* ---------- Responsiveness by scaling (smart shrink) ----------
+       We do NOT reflow the columns; instead we scale the whole .page-wrap on small screens
+       so the layout appears identical but scaled down.
+    */
+    @media (max-width:1200px){
+      /* JS also computes scale; CSS fallback: scale based on vw */
+      /* Browser CSS-only fallback (approx) */
+      .page-wrap{transform:scale(calc( (100vw) / 1200 ));}
+    }
+
+    @media (max-width:420px){
+      /* cap minimum scale */
+      .page-wrap{transform:scale(calc( (100vw) / 1200 ));}
+    }
+  </style>
+</head>
+<body>
+
+  <!--
+    Single-file METRO SPA - The Beauty Palace
+    IMPORTANT: Replace firebaseConfig below with your Firebase project values.
+  -->
+
+  <div id="root-wrap" style="padding:18px;">
+    <div class="page-wrap" id="pageWrap"><!-- all content inside this wrapper (1200px layout) -->
+
+      <!-- HEADER -->
+      <header>
+        <h1>METRO SPA</h1>
+        <p class="lead">The Beauty Palace — luxury salon & spa in Nakuru. We deliver professional beauty, wellness and grooming services that rejuvenate the body and calm the mind. Our team uses premium products, expert techniques and a customer-first approach to make every visit special.</p>
+        <p class="small">Open Mon–Sat | Bookings by appointment | Walk-ins welcomed where possible. Call or WhatsApp for quick booking.</p>
+      </header>
+
+      <!-- MAP + Buttons -->
+      <div id="map-section">
+        <!-- interactive embed centred on Nakuru -->
+        <iframe id="map" src="https://www.google.com/maps?q=Nakuru,+Kenya&output=embed" frameborder="0" allowfullscreen loading="lazy"></iframe>
+
+        <!-- controls outlined in grey box below map -->
+        <div class="map-controls" role="group" aria-label="map actions">
+          <button class="contact-btn" onclick="scrollToAbout()" title="Contact">Contact</button>
+          <button class="get-directions-btn" onclick="openDirections()" title="Get directions">Get Directions</button>
+        </div>
+      </div>
+
+      <!-- Services & Products (Two columns: left = services, right = lotions & perfumes) -->
+      <section id="services-products">
+        <div class="two-columns">
+          <!-- LEFT: 30 Female Services -->
+          <div>
+            <h2>Female Full-Body Services & Massage</h2>
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
+              <!-- 30 items -->
+              <!-- (I kept the same names/prices you asked earlier) -->
+              <div class="card"><h3>Facial Treatment</h3><p>KSh 3000</p><button class="btn" onclick="openBooking('Facial Treatment','Service',3000)">Book</button></div>
+              <div class="card"><h3>Swedish Massage</h3><p>KSh 5000</p><button class="btn" onclick="openBooking('Swedish Massage','Service',5000)">Book</button></div>
+              <div class="card"><h3>Deep Tissue Massage</h3><p>KSh 5500</p><button class="btn" onclick="openBooking('Deep Tissue Massage','Service',5500)">Book</button></div>
+              <div class="card"><h3>Hot Stone Massage</h3><p>KSh 6000</p><button class="btn" onclick="openBooking('Hot Stone Massage','Service',6000)">Book</button></div>
+              <div class="card"><h3>Reflexology</h3><p>KSh 4000</p><button class="btn" onclick="openBooking('Reflexology','Service',4000)">Book</button></div>
+              <div class="card"><h3>Body Scrub</h3><p>KSh 4500</p><button class="btn" onclick="openBooking('Body Scrub','Service',4500)">Book</button></div>
+              <div class="card"><h3>Hand Treatment</h3><p>KSh 1500</p><button class="btn" onclick="openBooking('Hand Treatment','Service',1500)">Book</button></div>
+              <div class="card"><h3>Foot Treatment</h3><p>KSh 2000</p><button class="btn" onclick="openBooking('Foot Treatment','Service',2000)">Book</button></div>
+              <div class="card"><h3>Hydrating Facial</h3><p>KSh 3500</p><button class="btn" onclick="openBooking('Hydrating Facial','Service',3500)">Book</button></div>
+              <div class="card"><h3>Anti-Aging Facial</h3><p>KSh 4000</p><button class="btn" onclick="openBooking('Anti-Aging Facial','Service',4000)">Book</button></div>
+              <div class="card"><h3>Acne Treatment</h3><p>KSh 3800</p><button class="btn" onclick="openBooking('Acne Treatment','Service',3800)">Book</button></div>
+              <div class="card"><h3>Brightening Facial</h3><p>KSh 3700</p><button class="btn" onclick="openBooking('Brightening Facial','Service',3700)">Book</button></div>
+              <div class="card"><h3>Manicure</h3><p>KSh 1200</p><button class="btn" onclick="openBooking('Manicure','Service',1200)">Book</button></div>
+              <div class="card"><h3>Pedicure</h3><p>KSh 1500</p><button class="btn" onclick="openBooking('Pedicure','Service',1500)">Book</button></div>
+              <div class="card"><h3>Gel Nails</h3><p>KSh 2000</p><button class="btn" onclick="openBooking('Gel Nails','Service',2000)">Book</button></div>
+              <div class="card"><h3>Acrylic Nails</h3><p>KSh 2500</p><button class="btn" onclick="openBooking('Acrylic Nails','Service',2500)">Book</button></div>
+              <div class="card"><h3>Haircut Women</h3><p>KSh 1800</p><button class="btn" onclick="openBooking('Haircut Women','Service',1800)">Book</button></div>
+              <div class="card"><h3>Hair Coloring</h3><p>KSh 5000</p><button class="btn" onclick="openBooking('Hair Coloring','Service',5000)">Book</button></div>
+              <div class="card"><h3>Highlights</h3><p>KSh 4500</p><button class="btn" onclick="openBooking('Highlights','Service',4500)">Book</button></div>
+              <div class="card"><h3>Balayage</h3><p>KSh 6000</p><button class="btn" onclick="openBooking('Balayage','Service',6000)">Book</button></div>
+              <div class="card"><h3>Hair Treatment</h3><p>KSh 4000</p><button class="btn" onclick="openBooking('Hair Treatment','Service',4000)">Book</button></div>
+              <div class="card"><h3>Makeup Application</h3><p>KSh 5000</p><button class="btn" onclick="openBooking('Makeup Application','Service',5000)">Book</button></div>
+              <div class="card"><h3>Bridal Makeup</h3><p>KSh 12000</p><button class="btn" onclick="openBooking('Bridal Makeup','Service',12000)">Book</button></div>
+              <div class="card"><h3>Eye Lash Extensions</h3><p>KSh 3500</p><button class="btn" onclick="openBooking('Eye Lash Extensions','Service',3500)">Book</button></div>
+              <div class="card"><h3>Brow Shaping</h3><p>KSh 1200</p><button class="btn" onclick="openBooking('Brow Shaping','Service',1200)">Book</button></div>
+              <div class="card"><h3>Brow Tint</h3><p>KSh 1000</p><button class="btn" onclick="openBooking('Brow Tint','Service',1000)">Book</button></div>
+              <div class="card"><h3>Waxing</h3><p>KSh 3000</p><button class="btn" onclick="openBooking('Waxing','Service',3000)">Book</button></div>
+              <div class="card"><h3>Facial Scrub</h3><p>KSh 3500</p><button class="btn" onclick="openBooking('Facial Scrub','Service',3500)">Book</button></div>
+              <div class="card"><h3>Body Wrap</h3><p>KSh 5500</p><button class="btn" onclick="openBooking('Body Wrap','Service',5500)">Book</button></div>
+            </div>
+          </div>
+
+          <!-- RIGHT: 30 Lotions & Perfumes -->
+          <div>
+            <h2>Body Lotions & Perfumes</h2>
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
+              <div class="card"><h3>Lotus Lotion</h3><p>KSh 1200</p><button class="btn" onclick="openBooking('Lotus Lotion','Product',1200)">Order</button></div>
+              <div class="card"><h3>Vanilla Lotion</h3><p>KSh 1300</p><button class="btn" onclick="openBooking('Vanilla Lotion','Product',1300)">Order</button></div>
+              <div class="card"><h3>Rose Perfume</h3><p>KSh 2500</p><button class="btn" onclick="openBooking('Rose Perfume','Product',2500)">Order</button></div>
+              <div class="card"><h3>Lavender Perfume</h3><p>KSh 2700</p><button class="btn" onclick="openBooking('Lavender Perfume','Product',2700)">Order</button></div>
+              <div class="card"><h3>Jasmine Lotion</h3><p>KSh 1250</p><button class="btn" onclick="openBooking('Jasmine Lotion','Product',1250)">Order</button></div>
+              <div class="card"><h3>Mango Lotion</h3><p>KSh 1300</p><button class="btn" onclick="openBooking('Mango Lotion','Product',1300)">Order</button></div>
+              <div class="card"><h3>Shea Butter Lotion</h3><p>KSh 1500</p><button class="btn" onclick="openBooking('Shea Butter Lotion','Product',1500)">Order</button></div>
+              <div class="card"><h3>Coconut Lotion</h3><p>KSh 1200</p><button class="btn" onclick="openBooking('Coconut Lotion','Product',1200)">Order</button></div>
+              <div class="card"><h3>Almond Lotion</h3><p>KSh 1350</p><button class="btn" onclick="openBooking('Almond Lotion','Product',1350)">Order</button></div>
+              <div class="card"><h3>Cherry Blossom Lotion</h3><p>KSh 1400</p><button class="btn" onclick="openBooking('Cherry Blossom Lotion','Product',1400)">Order</button></div>
+              <div class="card"><h3>Peach Lotion</h3><p>KSh 1300</p><button class="btn" onclick="openBooking('Peach Lotion','Product',1300)">Order</button></div>
+              <div class="card"><h3>Gardenia Lotion</h3><p>KSh 1450</p><button class="btn" onclick="openBooking('Gardenia Lotion','Product',1450)">Order</button></div>
+              <div class="card"><h3>Vanilla Perfume</h3><p>KSh 2600</p><button class="btn" onclick="openBooking('Vanilla Perfume','Product',2600)">Order</button></div>
+              <div class="card"><h3>Rose Perfume (2)</h3><p>KSh 2500</p><button class="btn" onclick="openBooking('Rose Perfume (2)','Product',2500)">Order</button></div>
+              <div class="card"><h3>Lavender Perfume (2)</h3><p>KSh 2700</p><button class="btn" onclick="openBooking('Lavender Perfume (2)','Product',2700)">Order</button></div>
+              <div class="card"><h3>Jasmine Perfume</h3><p>KSh 2650</p><button class="btn" onclick="openBooking('Jasmine Perfume','Product',2650)">Order</button></div>
+              <div class="card"><h3>Coconut Perfume</h3><p>KSh 2800</p><button class="btn" onclick="openBooking('Coconut Perfume','Product',2800)">Order</button></div>
+              <div class="card"><h3>Almond Perfume</h3><p>KSh 2900</p><button class="btn" onclick="openBooking('Almond Perfume','Product',2900)">Order</button></div>
+              <div class="card"><h3>Cherry Blossom Perfume</h3><p>KSh 3000</p><button class="btn" onclick="openBooking('Cherry Blossom Perfume','Product',3000)">Order</button></div>
+              <div class="card"><h3>Peach Perfume</h3><p>KSh 2850</p><button class="btn" onclick="openBooking('Peach Perfume','Product',2850)">Order</button></div>
+              <div class="card"><h3>Gardenia Perfume</h3><p>KSh 2950</p><button class="btn" onclick="openBooking('Gardenia Perfume','Product',2950)">Order</button></div>
+              <div class="card"><h3>Mango Perfume</h3><p>KSh 2750</p><button class="btn" onclick="openBooking('Mango Perfume','Product',2750)">Order</button></div>
+              <div class="card"><h3>Shea Butter Perfume</h3><p>KSh 3100</p><button class="btn" onclick="openBooking('Shea Butter Perfume','Product',3100)">Order</button></div>
+              <div class="card"><h3>Lotus Perfume</h3><p>KSh 2700</p><button class="btn" onclick="openBooking('Lotus Perfume','Product',2700)">Order</button></div>
+              <div class="card"><h3>Lily Perfume</h3><p>KSh 2800</p><button class="btn" onclick="openBooking('Lily Perfume','Product',2800)">Order</button></div>
+              <div class="card"><h3>Orange Blossom Perfume</h3><p>KSh 2750</p><button class="btn" onclick="openBooking('Orange Blossom Perfume','Product',2750)">Order</button></div>
+              <div class="card"><h3>Mint Perfume</h3><p>KSh 2600</p><button class="btn" onclick="openBooking('Mint Perfume','Product',2600)">Order</button></div>
+              <div class="card"><h3>Vanilla-Lavender Perfume</h3><p>KSh 2900</p><button class="btn" onclick="openBooking('Vanilla-Lavender Perfume','Product',2900)">Order</button></div>
+              <div class="card"><h3>Rose-Lily Perfume</h3><p>KSh 2950</p><button class="btn" onclick="openBooking('Rose-Lily Perfume','Product',2950)">Order</button></div>
+              <div class="card"><h3>Jasmine-Mango Perfume</h3><p>KSh 3000</p><button class="btn" onclick="openBooking('Jasmine-Mango Perfume','Product',3000)">Order</button></div>
+              <div class="card"><h3>Peach-Coconut Perfume</h3><p>KSh 3100</p><button class="btn" onclick="openBooking('Peach-Coconut Perfume','Product',3100)">Order</button></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Men Hairstyles - 20 items in 4 columns -->
+      <section id="men-hairstyles">
+        <h2>Men Hairstyles</h2>
+        <div class="four-columns">
+          <div class="card"><h3>Fade</h3><p>KSh 1200</p><button class="btn" onclick="openBooking('Fade','Service',1200)">Book</button></div>
+          <div class="card"><h3>Crew Cut</h3><p>KSh 1000</p><button class="btn" onclick="openBooking('Crew Cut','Service',1000)">Book</button></div>
+          <div class="card"><h3>Buzz Cut</h3><p>KSh 800</p><button class="btn" onclick="openBooking('Buzz Cut','Service',800)">Book</button></div>
+          <div class="card"><h3>Pompadour</h3><p>KSh 1500</p><button class="btn" onclick="openBooking('Pompadour','Service',1500)">Book</button></div>
+
+          <div class="card"><h3>Undercut</h3><p>KSh 1400</p><button class="btn" onclick="openBooking('Undercut','Service',1400)">Book</button></div>
+          <div class="card"><h3>Mohawk</h3><p>KSh 1600</p><button class="btn" onclick="openBooking('Mohawk','Service',1600)">Book</button></div>
+          <div class="card"><h3>Quiff</h3><p>KSh 1500</p><button class="btn" onclick="openBooking('Quiff','Service',1500)">Book</button></div>
+          <div class="card"><h3>Caesar Cut</h3><p>KSh 1200</p><button class="btn" onclick="openBooking('Caesar Cut','Service',1200)">Book</button></div>
+
+          <div class="card"><h3>Taper</h3><p>KSh 1300</p><button class="btn" onclick="openBooking('Taper','Service',1300)">Book</button></div>
+          <div class="card"><h3>Flat Top</h3><p>KSh 1400</p><button class="btn" onclick="openBooking('Flat Top','Service',1400)">Book</button></div>
+          <div class="card"><h3>French Crop</h3><p>KSh 1250</p><button class="btn" onclick="openBooking('French Crop','Service',1250)">Book</button></div>
+          <div class="card"><h3>Side Part</h3><p>KSh 1100</p><button class="btn" onclick="openBooking('Side Part','Service',1100)">Book</button></div>
+
+          <div class="card"><h3>Textured Crop</h3><p>KSh 1300</p><button class="btn" onclick="openBooking('Textured Crop','Service',1300)">Book</button></div>
+          <div class="card"><h3>Short Pompadour</h3><p>KSh 1500</p><button class="btn" onclick="openBooking('Short Pompadour','Service',1500)">Book</button></div>
+          <div class="card"><h3>Spiky Hair</h3><p>KSh 1400</p><button class="btn" onclick="openBooking('Spiky Hair','Service',1400)">Book</button></div>
+          <div class="card"><h3>Brush Up</h3><p>KSh 1350</p><button class="btn" onclick="openBooking('Brush Up','Service',1350)">Book</button></div>
+
+          <div class="card"><h3>Layered Cut</h3><p>KSh 1250</p><button class="btn" onclick="openBooking('Layered Cut','Service',1250)">Book</button></div>
+          <div class="card"><h3>Textured Fade</h3><p>KSh 1300</p><button class="btn" onclick="openBooking('Textured Fade','Service',1300)">Book</button></div>
+          <div class="card"><h3>Side Sweep</h3><p>KSh 1200</p><button class="btn" onclick="openBooking('Side Sweep','Service',1200)">Book</button></div>
+          <div class="card"><h3>High Fade</h3><p>KSh 1500</p><button class="btn" onclick="openBooking('High Fade','Service',1500)">Book</button></div>
+        </div>
+      </section>
+
+      <!-- Offers section (visible to customers; admin can add) -->
+      <section id="offers">
+        <h2>Discounts & Offers</h2>
+        <div class="offers-list" id="offersList">
+          <!-- loaded from Firebase in realtime -->
+          <div class="offer muted">No offers available right now.</div>
+        </div>
+      </section>
+
+      <!-- Admin login area -->
+      <section id="admin-section">
+        <h2>Admin</h2>
+        <div style="display:flex;gap:12px;align-items:center">
+          <button class="btn" onclick="showAdminLogin()">Admin Login</button>
+          <div class="muted" style="font-size:13px">Admin access is restricted to <strong>antonywambuamwangi@gmail.com</strong> or device with phone <strong>+254759933073</strong>.</div>
+        </div>
+
+        <!-- Admin area appears after login -->
+        <div id="admin-area">
+          <h3>Admin Dashboard (Realtime)</h3>
+
+          <!-- Booking list -->
+          <div style="margin-bottom:10px">
+            <strong>Incoming bookings / orders</strong>
+            <div id="adminBookings" class="admin-list"></div>
+          </div>
+
+          <!-- Offers manager -->
+          <div style="margin-top:12px">
+            <strong>Publish Offer</strong>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <input id="offerTitle" placeholder="Offer title (e.g. 20% off Facials)" style="flex:1;padding:8px;border-radius:8px;border:1px solid #ccc">
+              <input id="offerExpiry" placeholder="Expiry (YYYY-MM-DD)" style="width:160px;padding:8px;border-radius:8px;border:1px solid #ccc">
+              <button class="btn" onclick="addOffer()">Publish</button>
+            </div>
+          </div>
+
+          <div style="margin-top:12px">
+            <button class="btn" onclick="adminSignOut()" style="background:#ff5a5a">Sign out</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- About Us + WhatsApp -->
+      <section id="about-us">
+        <h2>About Us</h2>
+        <p>Welcome to <strong>METRO SPA — The Beauty Palace</strong>. We are a team of licensed beauty therapists and stylists based in Nakuru, delivering premium salon, spa and cosmetic services to clients both locally and from abroad. Our mission is to combine proven techniques with premium products to bring out the best version of you.</p>
+        <p>Opening hours: Mon–Sat 9:00 – 19:00. Walk-ins where available, appointments recommended.</p>
+        <p>Contact Email: <a href="mailto:antonywambuamwangi@gmail.com">antonywambuamwangi@gmail.com</a></p>
+        <p>Location: Nakuru, Kenya</p>
+        <a id="whatsapp-btn" href="https://wa.me/254759933073" target="_blank">Chat on WhatsApp</a>
+      </section>
+
+      <footer>
+        &copy; 2025 METRO SPA — All Rights Reserved.
+      </footer>
+
+    </div><!-- end page-wrap -->
+  </div><!-- root-wrap -->
+
+  <!-- ---------- Booking modal ---------- -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h4 id="modalTitle">Book / Order</h4>
+      <div id="modalItemInfo" class="muted">...</div>
+
+      <label>Name <input id="bkName" placeholder="Full name"></label>
+      <label>Email <input id="bkEmail" placeholder="Email"></label>
+      <label>Phone <input id="bkPhone" placeholder="+2547..."></label>
+
+      <div class="row">
+        <div class="col">
+          <label>Date <input id="bkDate" type="date"></label>
+        </div>
+        <div class="col">
+          <label>Time <input id="bkTime" type="time"></label>
+        </div>
+      </div>
+
+      <label>Notes <textarea id="bkNotes" rows="3" placeholder="Any other details"></textarea></label>
+
+      <div class="actions">
+        <button onclick="closeModal()" style="padding:8px 12px;border-radius:8px;border:1px solid #ccc;background:#fff">Cancel</button>
+        <button class="btn" onclick="submitBooking()" style="padding:8px 12px;">Confirm Booking</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- Admin login modal (simple) ---------- -->
+  <div class="modal-backdrop" id="adminLoginBackdrop">
+    <div class="modal">
+      <h4>Admin Login</h4>
+      <p class="muted">Sign in with the admin email or use phone login (demo PIN). Email auth uses Firebase Email/Password.</p>
+
+      <label>Admin Email <input id="adminEmail" placeholder="admin@example.com"></label>
+      <label>Password <input id="adminPassword" type="password" placeholder="password"></label>
+      <div style="text-align:center;margin:10px 0">— OR —</div>
+
+      <label>Admin Phone <input id="adminPhone" placeholder="+254..."></label>
+      <label>Admin PIN <input id="adminPhonePin" placeholder="PIN (demo)"></label>
+
+      <div class="actions">
+        <button onclick="closeAdminLogin()" style="padding:8px 12px;border-radius:8px;border:1px solid #ccc;background:#fff">Cancel</button>
+        <button class="btn" onclick="adminSignIn()">Sign In</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- Firebase (compat) ---------- -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+  <script>
+    /************************************************************************
+     * TODO: Replace the firebaseConfig below with your project's settings.
+     * You can get these from Firebase Console -> Project Settings -> SDK.
+     ************************************************************************/
+    const firebaseConfig = {
+      apiKey: "AIzaSyDlmknT3wOFW1WbFNCAnYrNgvEWKMuuyds",
+      authDomain: "metro-spa-2883a.firebaseapp.com",
+      databaseURL: "https://YOUR_FIREBASE_PROJECT-default-rtdb.firebaseio.com",
+      projectId: "metro-spa-2883a",
+      storageBucket: "metro-spa-2883a.firebasestorage.app",
+      messagingSenderId: "315219347006",
+      appId: "1:315219347006:web:825d34b40f6e8b637ef36f"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    /************************************************************************
+     * Admin credentials / phone PIN for demo:
+     * - Admin email MUST be antonywambuamwangi@gmail.com (per request)
+     * - Admin phone MUST be +254759933073 (per request)
+     * For phone-based admin login this demo checks phone+PIN client-side.
+     * Change ADMIN_PHONE_PIN to something secret in production.
+     ************************************************************************/
+    const ADMIN_EMAIL = 'antonywambuamwangi@gmail.com';
+    const ADMIN_PHONE = '+254759933073';
+    const ADMIN_PHONE_PIN = 'METROADMIN2025'; // change this before use
+
+    /****************** Smart shrink JS (precise scaling) ******************/
+    function applyScale() {
+      const pageWrap = document.getElementById('pageWrap');
+      const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+      const desktopW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--desktop-width')) || 1200;
+      const scale = Math.min(1, vw / desktopW);
+      pageWrap.style.transform = 'scale(' + scale + ')';
+    }
+    window.addEventListener('resize', applyScale);
+    applyScale();
+
+    /****************** Map Buttons ******************/
+    function openDirections(){
+      window.open("https://www.google.com/maps/dir/?api=1&destination=Nakuru,+Kenya", "_blank");
+    }
+    function scrollToAbout(){
+      // scroll root-wrap so scaled layout brings about-us into view
+      const about = document.getElementById('about-us');
+      // scroll to top of wrapper then smooth scroll within pageWrap
+      about.scrollIntoView({behavior:'smooth',block:'center'});
+    }
+
+    /****************** Booking modal logic ******************/
+    let currentItem = null;
+    function openBooking(itemName, type, price){
+      currentItem = {name:itemName, type:type, price:price};
+      document.getElementById('modalItemInfo').textContent = `${itemName} (${type}) — KSh ${price}`;
+      document.getElementById('bkName').value = '';
+      document.getElementById('bkEmail').value = '';
+      document.getElementById('bkPhone').value = '';
+      document.getElementById('bkDate').value = '';
+      document.getElementById('bkTime').value = '';
+      document.getElementById('bkNotes').value = '';
+      document.getElementById('modalBackdrop').style.display = 'flex';
+    }
+    function closeModal(){ document.getElementById('modalBackdrop').style.display='none'; }
+
+    function submitBooking(){
+      const name = document.getElementById('bkName').value.trim();
+      const email = document.getElementById('bkEmail').value.trim();
+      const phone = document.getElementById('bkPhone').value.trim();
+      const date = document.getElementById('bkDate').value;
+      const time = document.getElementById('bkTime').value;
+      const notes = document.getElementById('bkNotes').value.trim();
+
+      if(!name || !phone || !date){
+        alert('Please provide your name, phone and preferred date.');
+        return;
+      }
+
+      const payload = {
+        item: currentItem.name,
+        type: currentItem.type,
+        price: currentItem.price,
+        name, email, phone,
+        date, time,
+        notes,
+        status: 'pending',
+        createdAt: Date.now()
+      };
+
+      // push to Firebase Realtime DB
+      db.ref('bookings').push(payload)
+        .then(() => {
+          alert('Booking successful — we will contact you. Thank you!');
+          closeModal();
+        })
+        .catch(err => {
+          console.error(err);
+          alert('Failed to send booking — try again later.');
+        });
+    }
+
+    /****************** Admin login UI ******************/
+    function showAdminLogin(){
+      document.getElementById('adminLoginBackdrop').style.display = 'flex';
+    }
+    function closeAdminLogin(){ document.getElementById('adminLoginBackdrop').style.display = 'none'; }
+
+    async function adminSignIn(){
+      const email = document.getElementById('adminEmail').value.trim();
+      const pwd = document.getElementById('adminPassword').value;
+      const phone = document.getElementById('adminPhone').value.trim();
+      const pin = document.getElementById('adminPhonePin').value.trim();
+
+      // Try email/password login first if email provided
+      if(email && pwd){
+        try{
+          const userCredential = await auth.signInWithEmailAndPassword(email,pwd);
+          if(userCredential.user && userCredential.user.email===ADMIN_EMAIL){
+            // allowed: show admin area
+            onAdminAuthenticated({method:'email', uid:userCredential.user.uid, email:userCredential.user.email});
+            closeAdminLogin();
+            return;
+          } else {
+            alert('Access denied: not the authorized admin email.');
+            await auth.signOut();
+            return;
+          }
+        } catch(err){
+          alert('Email sign-in failed: ' + err.message);
+          return;
+        }
+      }
+
+      // else allow phone+PIN demo flow (client-side check)
+      if(phone && pin){
+        if(phone===ADMIN_PHONE && pin===ADMIN_PHONE_PIN){
+          // set a simple local token to mark admin (in production use secure auth)
+          localStorage.setItem('metro_admin_demo','true');
+          onAdminAuthenticated({method:'phone', phone});
+          closeAdminLogin();
+          return;
+        } else {
+          alert('Phone or PIN incorrect.');
+          return;
+        }
+      }
+
+      alert('Provide admin email+password OR admin phone+PIN.');
+    }
+
+    function adminSignOut(){
+      // clear demo token and sign out firebase
+      localStorage.removeItem('metro_admin_demo');
+      auth.signOut();
+      document.getElementById('admin-area').style.display='none';
+      alert('Signed out');
+    }
+
+    /****************** Admin authenticated flow ******************/
+    function onAdminAuthenticated(info){
+      // Show admin area and start realtime listeners
+      document.getElementById('admin-area').style.display='block';
+      // load existing bookings and listen for changes
+      const bookingsList = document.getElementById('adminBookings');
+      bookingsList.innerHTML = '<div class="muted">Loading...</div>';
+      db.ref('bookings').on('value', snapshot=>{
+        bookingsList.innerHTML = '';
+        if(!snapshot.exists()){
+          bookingsList.innerHTML = '<div class="muted">No bookings yet.</div>';
+          return;
+        }
+        snapshot.forEach(child=>{
+          const key = child.key;
+          const data = child.val();
+          const div = document.createElement('div');
+          div.className = 'admin-item';
+          const dt = new Date(data.createdAt || Date.now());
+          div.innerHTML = `<strong>${data.type.toUpperCase()}</strong> - <em>${data.item}</em><br>
+                           <strong>Name:</strong> ${escapeHtml(data.name)} <strong>Phone:</strong> ${escapeHtml(data.phone)}<br>
+                           <strong>Date:</strong> ${escapeHtml(data.date)} ${escapeHtml(data.time || '')} | <strong>Status:</strong> ${escapeHtml(data.status || '')}<br>
+                           <small class="muted">Booked: ${dt.toLocaleString()}</small>
+                           <div style="margin-top:8px"><button onclick="markAsDone('${key}')" style="padding:6px 10px;border-radius:8px;border:1px solid #ccc;background:#fff">Mark Completed</button>
+                           <button onclick="removeBooking('${key}')" style="padding:6px 10px;border-radius:8px;background:#ff6b6b;color:#fff;border:none;margin-left:6px">Delete</button></div>
+                           <div style="margin-top:6px"><small>${escapeHtml(data.notes || '')}</small></div>`;
+          bookingsList.appendChild(div);
+        });
+      });
+
+      // load offers realtime
+      db.ref('offers').on('value', snapshot=>{
+        const offersList = document.getElementById('offersList');
+        offersList.innerHTML='';
+        if(!snapshot.exists()){
+          offersList.innerHTML = '<div class="offer muted">No offers available right now.</div>';
+          return;
+        }
+        snapshot.forEach(child=>{
+          const o = child.val();
+          const div = document.createElement('div');
+          div.className = 'offer';
+          div.innerHTML = `<strong>${escapeHtml(o.title)}</strong> — <span class="muted">expires: ${escapeHtml(o.expiry || 'N/A')}</span>`;
+          offersList.appendChild(div);
+        });
+      });
+    }
+
+    // Admin helper actions
+    function markAsDone(key){
+      db.ref('bookings/'+key).update({status:'completed'});
+    }
+    function removeBooking(key){
+      if(confirm('Delete this booking?')) db.ref('bookings/'+key).remove();
+    }
+
+    // Add offer (admin)
+    function addOffer(){
+      const title = document.getElementById('offerTitle').value.trim();
+      const expiry = document.getElementById('offerExpiry').value.trim();
+      if(!title){alert('Enter an offer title');return;}
+      db.ref('offers').push({title, expiry, createdAt:Date.now()});
+      document.getElementById('offerTitle').value='';
+      document.getElementById('offerExpiry').value='';
+    }
+
+    // Escape HTML for admin UI display
+    function escapeHtml(s){ if(!s) return ''; return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+    /****************** Offers initial load (in case admin not signed in) ******************/
+    db.ref('offers').once('value').then(snapshot=>{
+      const list = document.getElementById('offersList');
+      list.innerHTML='';
+      if(!snapshot.exists()){
+        list.innerHTML = '<div class="offer muted">No offers available right now.</div>';
+        return;
+      }
+      snapshot.forEach(child=>{
+        const o=child.val();
+        const div=document.createElement('div');
+        div.className='offer';
+        div.innerHTML=`<strong>${escapeHtml(o.title)}</strong> — <span class="muted">expires: ${escapeHtml(o.expiry||'N/A')}</span>`;
+        list.appendChild(div);
+      });
+    });
+
+    /****************** Quick check for previously logged-in admin (demo token) ************/
+    if(localStorage.getItem('metro_admin_demo')==='true'){
+      onAdminAuthenticated({method:'demo-phone', phone:ADMIN_PHONE});
+    } else {
+      // Try firebase auth state change (email)
+      auth.onAuthStateChanged(user=>{
+        if(user && user.email===ADMIN_EMAIL){
+          onAdminAuthenticated({method:'firebase', email:user.email});
+        }
+      });
+    }
+  </script>
+</body>
+</html>
